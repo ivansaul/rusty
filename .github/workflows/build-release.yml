@@ -119,5 +119,6 @@ jobs:
             @semantic-release/github
             @semantic-release/exec
             @semantic-release/git
+            conventional-changelog-conventionalcommits
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
