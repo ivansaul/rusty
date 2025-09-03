@@ -19,9 +19,6 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  get-next-version:
-    uses: semantic-release-action/next-release-version/.github/workflows/next-release-version.yml@v4
-
   build-release:
     if: github.event_name == 'release' && github.event.action == 'created'
     runs-on: ubuntu-latest
