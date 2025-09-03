@@ -1,0 +1,25 @@
+[package]
+name = "rust-template"
+version = "0.0.1"
+edition = "2021"
+description = "A template for Rust projects"
+license = "MIT"
+keywords = ["rust", "template"]
+authors = ["NINNiT"]
+
+[dependencies]
+async-trait = "0.1.80"
+clap = { version = "4.5.0", features = ["derive"] }
+color-eyre = "0.6.3"
+colored = "2.1.0"
+eyre = "0.6.12"
+figment = { version = "0.10.18", features = ["toml", "env"] }
+serde = { version = "1.0.198", features = ["derive"] }
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+
+[profile.release]
+opt-level = "z"
+strip = true
+lto = true
