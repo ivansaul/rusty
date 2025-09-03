@@ -109,7 +109,10 @@ jobs:
           key: ${{ runner.os }}-cargo-edit
 
       - name: Install Cargo Edit
-        run: cargo install cargo-edit
+        run: |
+          if ! command -v cargo-edit &> /dev/null; then
+            cargo install cargo-edit
+          fi
 
       - uses: actions/setup-node@v4
         with:
