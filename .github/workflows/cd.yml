@@ -1,0 +1,92 @@
+name: CD
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  semantic_release:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN}}
+    needs: [ci]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Cache cargo bin
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+          key: ${{ runner.os }}-cargo-bin
+
+      - name: Install Cargo Edit
+        run: |
+          if ! command -v cargo-set-version &> /dev/null; then
+            cargo install cargo-edit
+          fi
+
+      - name: Run Semantic Release
+        uses: cycjimmy/semantic-release-action@v4
+        with:
+          extra_plugins: |
+            @semantic-release/commit-analyzer
+            @semantic-release/release-notes-generator
+            @semantic-release/github
+            @semantic-release/exec
+            @semantic-release/git
+            conventional-changelog-conventionalcommits
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+  build-release:
+    runs-on: ubuntu-latest
+    needs: [semantic_release]
+    env:
+      APP_NAME: ${{ github.event.repository.name }}
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: rust-cache
+
+      - name: Build Release Binary
+        run: cargo build --release --verbose
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cargo-build-release
+          path: target/release
+
+      - name: Create package archive
+        run: |
+          mkdir -p /tmp/packaging
+          cp README.md /tmp/packaging/README.md
+          cp target/release/$APP_NAME /tmp/packaging/$APP_NAME
+          cp config.toml /tmp/packaging/config.toml
+          tar -czf $APP_NAME-${{ github.event.release.tag_name}}.tar.gz -C /tmp packaging
+
+      - name: Upload to current release
+        run: gh release upload ${{ github.event.release.tag_name }} $APP_NAME-${{ github.event.release.tag_name}}.tar.gz
