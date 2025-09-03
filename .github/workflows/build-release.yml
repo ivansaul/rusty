@@ -110,31 +110,14 @@ jobs:
             cargo install cargo-edit
           fi
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-          check-latest: true
-
-      - name: Cache node modules
-        id: cache-npm
-        uses: actions/cache@v4
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-npm-cache
-          restore-keys: |
-            ${{ runner.os }}-npm-cache
-
-      - name: Install Dependencies
-        run: |
-          npm install semantic-release \
-            conventional-changelog-conventionalcommits \
-            @semantic-release/commit-analyzer \
-            @semantic-release/git \
-            @semantic-release/github \
-            @semantic-release/exec \
-            @semantic-release/changelog
-
       - name: Run Semantic Release
-        run: npx semantic-release
+        uses: cycjimmy/semantic-release-action@v4
+        with:
+          extra_plugins: |
+            @semantic-release/commit-analyzer
+            @semantic-release/release-notes-generator
+            @semantic-release/github
+            @semantic-release/exec
+            @semantic-release/git
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
