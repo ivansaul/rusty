@@ -1,0 +1,129 @@
+name: Rust
+
+permissions:
+contents: write
+
+on:
+  push:
+    branches: ["*"]
+  pull_request:
+    branches: ["*"]
+  release:
+    types: [created]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  get-next-version:
+    uses: semantic-release-action/next-release-version/.github/workflows/next-release-version.yml@v4
+
+
+
+  build-release:
+    if: github.event_name == 'release' && github.event.action == 'created'
+    runs-on: ubuntu-latest
+    environment: default
+    env:
+      APP_NAME: ${{ github.event.repository.name }}
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: rust-cache
+      - name: Build Release Binary
+        run: cargo build --release --verbose
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cargo-build-release
+          path: target/release
+      - name: Create package archive
+        run: |
+          mkdir -p /tmp/packaging
+          cp README.md /tmp/packaging/README.md
+          cp target/release/$APP_NAME /tmp/packaging/$APP_NAME
+          cp config.toml /tmp/packaging/config.toml
+          tar -czf $APP_NAME-${{ github.event.release.tag_name}}.tar.gz -C /tmp packaging
+      - name: Upload to current release
+        run: gh release upload ${{ github.event.release.tag_name }} $APP_NAME-${{ github.event.release.tag_name}}.tar.gz
+
+  test:
+    name: Cargo test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        id: rust-toolchain
+        with:
+          toolchain: stable
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        id: cache-cargo
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ steps.rust-toolchain.outputs.cachekey }}-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cargo test
+        run: cargo test --verbose
+    
+  semantic_release:
+    # This job runs on every push to 'main' branch after a successful build and test.
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN}}
+    environment: default
+    needs: [test]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          check-latest: true
+          cache: npm
+
+      - name: Cache node modules
+        id: cache-npm
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-npm-cache
+          restore-keys: |
+            ${{ runner.os }}-npm-cache
+
+      - name: Install Dependencies
+        run: |
+          npm install semantic-release \
+            conventional-changelog-conventionalcommits \
+            @semantic-release/commit-analyzer \
+            @semantic-release/git \
+            @semantic-release/github \
+            @semantic-release/exec \
+            @semantic-release/changelog \
+            @semantic-release-cargo/semantic-release-cargo
+
+      - name: Run Semantic Release
+        run: npx semantic-release
