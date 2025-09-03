@@ -49,36 +49,6 @@ jobs:
       - name: Upload to current release
         run: gh release upload ${{ github.event.release.tag_name }} $APP_NAME-${{ github.event.release.tag_name}}.tar.gz
 
-  # build-docker:
-  #   if: github.event_name == 'release' && github.event.action == 'created'
-  #   runs-on: ubuntu-latest
-  #   environment: default
-  #   env:
-  #     GITHUB_TOKEN: ${{ secrets.GH_TOKEN}}
-  #     FULL_REGISTRY_URI: ghcr.io/ninnit/rust-template
-  #   needs: build-release
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Download artifacts
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: cargo-build-release
-  #         path: target/release
-  #     - name: Login to Docker Hub
-  #       run: echo "${{ secrets.GH_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-  #     - name: Fetch Docker Image
-  #       run: docker pull $FULL_REGISTRY_URI:latest || true
-  #     - name: Build Docker Image and tag with version
-  #       run: docker build -t $FULL_REGISTRY_URI:${{ github.event.release.tag_name }} -f Dockerfile .
-  #     - name: Push Docker Image
-  #       run: docker push $FULL_REGISTRY_URI:${{ github.event.release.tag_name }}
-  #     - name: Tag Docker Image with latest
-  #       run: |
-  #         if [[ "${{ github.event.release.prerelease }}" == "false" ]]; then
-  #           docker tag $FULL_REGISTRY_URI:${{ github.event.release.tag_name }} $FULL_REGISTRY_URI:latest
-  #           docker push $FULL_REGISTRY_URI:latest
-  #         fi
-
   test:
     runs-on: ubuntu-latest
     environment: default
