@@ -16,6 +16,8 @@ jobs:
 
   semantic_release:
     runs-on: ubuntu-latest
+    outputs:
+      release_version: ${{ steps.semantic.outputs.new_release_version }}
     env:
       GH_TOKEN: ${{ secrets.GH_TOKEN}}
     needs: [ci]
@@ -46,6 +48,7 @@ jobs:
 
       - name: Run Semantic Release
         uses: cycjimmy/semantic-release-action@v4
+        id: semantic
         with:
           extra_plugins: |
             @semantic-release/commit-analyzer
@@ -63,11 +66,10 @@ jobs:
     env:
       APP_NAME: ${{ github.event.repository.name }}
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      RELEASE_VERSION: ${{ needs.semantic_release.outputs.release_version }}
 
     steps:
       - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
 
       - uses: Swatinem/rust-cache@v2
         with:
@@ -91,4 +93,4 @@ jobs:
           tar -czf $APP_NAME.tar.gz -C /tmp packaging
 
       - name: Upload to current release
-        run: gh release upload $(git describe --tags --abbrev=0) $APP_NAME.tar.gz
+        run: gh release upload $RELEASE_VERSION $APP_NAME.tar.gz
