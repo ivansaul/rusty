@@ -110,7 +110,7 @@ jobs:
 
       - name: Install Cargo Edit
         run: |
-          if ! command -v cargo-edit &> /dev/null; then
+          if ! command -v cargo-set-version &> /dev/null; then
             cargo install cargo-edit
           fi
 
