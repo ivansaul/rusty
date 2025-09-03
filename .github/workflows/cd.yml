@@ -86,7 +86,7 @@ jobs:
           cp README.md /tmp/packaging/README.md
           cp target/release/$APP_NAME /tmp/packaging/$APP_NAME
           cp config.toml /tmp/packaging/config.toml
-          tar -czf $APP_NAME-${{ github.event.release.tag_name}}.tar.gz -C /tmp packaging
+          tar -czf $APP_NAME.tar.gz -C /tmp packaging
 
       - name: Upload to current release
-        run: gh release upload ${{ github.event.release.tag_name }} $APP_NAME-${{ github.event.release.tag_name}}.tar.gz
+        run: gh release upload $(git describe --tags --abbrev=0) $APP_NAME.tar.gz
