@@ -1,7 +1,7 @@
 name: Rust
 
 permissions:
- contents: write
+  contents: write
 
 on:
   push:
@@ -76,7 +76,7 @@ jobs:
 
       - name: Cargo test
         run: cargo test --verbose
-    
+
   semantic_release:
     # This job runs on every push to 'main' branch after a successful build and test.
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta'
@@ -91,7 +91,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
