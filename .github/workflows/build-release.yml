@@ -119,8 +119,7 @@ jobs:
             @semantic-release/git \
             @semantic-release/github \
             @semantic-release/exec \
-            @semantic-release/changelog \
-            @semantic-release-cargo/semantic-release-cargo
+            @semantic-release/changelog
 
       - name: Run Semantic Release
         run: npx semantic-release
