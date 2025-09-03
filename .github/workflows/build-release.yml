@@ -94,6 +94,25 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
+      
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-edit
+
+      - name: Install Cargo Edit
+        run: cargo install cargo-edit
 
       - uses: actions/setup-node@v4
         with:
