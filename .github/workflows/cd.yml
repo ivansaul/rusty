@@ -60,6 +60,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
+      - name: DEBUG CHANGELOG
+        run: |
+          cat CHANGELOG.md
+
   build-release:
     name: Build ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
