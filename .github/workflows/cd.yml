@@ -121,11 +121,6 @@ jobs:
             ;;
           esac;
 
-      # - name: Debug list release dir
-      #   run: |
-      #     echo "Listing target/${{ matrix.target }}/release"
-      #     ls -la target/${{ matrix.target }}/release || true
-
       - name: Upload assets to release
         uses: softprops/action-gh-release@v1
         with:
