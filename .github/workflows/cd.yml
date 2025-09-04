@@ -101,11 +101,6 @@ jobs:
           command: build
           args: --release --locked --target ${{ matrix.target }}
 
-      # - name: Debug list release dir
-      #   run: |
-      #     echo "Listing target/${{ matrix.target }}/release"
-      #     ls -la target/${{ matrix.target }}/release || true
-
       - name: Package
         shell: bash
         run: |
