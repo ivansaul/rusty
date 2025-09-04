@@ -129,6 +129,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.RELEASE_TAG }}
-          files: target/${{ matrix.target }}/release/${{ env.APP_NAME }}-${{ matrix.target }}-*
+          files: target/${{ matrix.target }}/release/${{ env.APP_NAME }}-${{ matrix.target }}*
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
