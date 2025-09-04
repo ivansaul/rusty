@@ -64,6 +64,7 @@ jobs:
     name: Build ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     needs: [semantic_release]
+    if: needs.semantic_release.outputs.release_tag != ''
     env:
       APP_NAME: ${{ github.event.repository.name }}
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
