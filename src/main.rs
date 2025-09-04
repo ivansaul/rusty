@@ -90,7 +90,7 @@ async fn daemon() -> eyre::Result<()> {
     let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(5));
     loop {
         interval.tick().await;
-        info!("Daemon is running...");
+        info!("Daemon is running....");
     }
 }
 
