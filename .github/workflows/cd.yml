@@ -88,10 +88,6 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v5
 
-      - name: Install Linux dependencies
-        if: matrix.dependencies
-        run: sudo apt-get update && sudo apt-get install -y ${{ matrix.dependencies }}
-
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -103,6 +99,11 @@ jobs:
           use-cross: ${{ matrix.cross_arch }}
           command: build
           args: --release --locked --target ${{ matrix.target }}
+
+      - name: Debug list release dir
+        run: |
+          echo "Listing target/${{ matrix.target }}/release"
+          ls -la target/${{ matrix.target }}/release || true
 
       - name: Package
         shell: bash
